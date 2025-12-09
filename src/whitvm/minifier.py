@@ -15,7 +15,7 @@ class WhitVMMinifier:
     @staticmethod
     def minify(code: str, shrink_vars: bool = True, shrink_labels: bool = True, 
                eval_const: bool = True, remove_defaults: bool = True, pool_strings: bool = True,
-               dead_code: bool = False) -> str:
+               dead_code: bool = False, simplify_expr: bool = True, remove_unused_jumps: bool = True) -> str:
         """Minify WhitVM code
         
         Removes:
@@ -24,12 +24,15 @@ class WhitVMMinifier:
         - Leading/trailing whitespace on each line
         - Default arguments (say ... 1 1 → say ...)
         - Whitespace between tokens
+        - Unused jumps (jumps to next instruction)
         
         Optionally:
         - Shrink variable names (*player_health* → *a*, *count* → *b*, etc.)
         - Shrink label names (:main_loop: → :a:, :check_health: → :b:, etc.)
         - Evaluate constant expressions at compile time
         - Pool repeated strings into variables (#text# → *s* where *s* = #text#)
+        - Simplify expressions (remove nested parentheses)
+        - Remove unused jumps
         
         Args:
             code: WhitVM source code
@@ -39,6 +42,8 @@ class WhitVMMinifier:
             remove_defaults: Remove default arguments (1 1 from say)
             pool_strings: Extract repeated strings into variables
             dead_code: Remove unused variables (set but never used)
+            simplify_expr: Simplify expressions by removing unnecessary parentheses
+            remove_unused_jumps: Remove jumps that target the next instruction
             
         Returns:
             Minified code
@@ -69,11 +74,15 @@ class WhitVMMinifier:
         if eval_const:
             cleaned_lines = [WhitVMMinifier._eval_constants(line) for line in cleaned_lines]
         
-        # Fifth pass: remove default arguments
+        # Fifth pass: expression simplification
+        if simplify_expr:
+            cleaned_lines = [WhitVMMinifier._simplify_expression(line) for line in cleaned_lines]
+        
+        # Sixth pass: remove default arguments
         if remove_defaults:
             cleaned_lines = [WhitVMMinifier._remove_defaults(line) for line in cleaned_lines]
         
-        # Sixth pass: string pooling
+        # Seventh pass: string pooling
         string_map = {}
         if pool_strings:
             string_map = WhitVMMinifier._build_string_map(cleaned_lines)
@@ -82,11 +91,15 @@ class WhitVMMinifier:
             setup_lines = WhitVMMinifier._create_string_setup(string_map)
             cleaned_lines = setup_lines + cleaned_lines
         
-        # Seventh pass: dead code elimination (remove unused variables)
+        # Eighth pass: dead code elimination (remove unused variables)
         if dead_code:
             cleaned_lines = WhitVMMinifier._remove_dead_code(cleaned_lines)
         
-        # Eighth pass: compact spacing (remove extra spaces)
+        # Ninth pass: remove unused jumps
+        if remove_unused_jumps:
+            cleaned_lines = WhitVMMinifier._remove_unused_jumps(cleaned_lines)
+        
+        # Tenth pass: compact spacing (remove extra spaces)
         cleaned_lines = [WhitVMMinifier._compact_spacing(line) for line in cleaned_lines]
         
         return '\n'.join(cleaned_lines)
@@ -449,6 +462,112 @@ class WhitVMMinifier:
                     result.append(line)
             else:
                 result.append(line)
+        
+        return result
+    
+    @staticmethod
+    def _simplify_expression(line: str) -> str:
+        """Simplify expressions by removing unnecessary nested parentheses
+        
+        E.g., ((*a*)) → (*a*), ((5)) → 5, ((*a*) + 3) → (*a* + 3)
+        """
+        result = []
+        i = 0
+        
+        while i < len(line):
+            if line[i] == '(':
+                # Found an expression, try to simplify it
+                end = WhitVMMinifier._find_matching_paren(line, i)
+                if end != -1:
+                    expr = line[i:end+1]
+                    simplified = WhitVMMinifier._simplify_single_expr(expr)
+                    result.append(simplified)
+                    i = end + 1
+                else:
+                    result.append(line[i])
+                    i += 1
+            else:
+                result.append(line[i])
+                i += 1
+        
+        return ''.join(result)
+    
+    @staticmethod
+    def _simplify_single_expr(expr: str) -> str:
+        """Simplify a single expression by removing unnecessary nested parentheses
+        
+        ((*a*)) → (*a*), but preserve ((*a*) + 3) as is (needed for expression context)
+        Only simplify if the entire inner expression is a single variable or literal
+        """
+        if not expr.startswith('(') or not expr.endswith(')'):
+            return expr
+        
+        # Remove outer parentheses and check if still valid
+        inner = expr[1:-1].strip()
+        
+        # Check if inner is a simple single token (variable, number, or expression)
+        # We only simplify ((var)) or ((5)) patterns, not (a + b)
+        depth = 0
+        has_operators = False
+        
+        for char in inner:
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                depth -= 1
+            elif char in '+-*/%<>=!' and depth == 0:
+                has_operators = True
+                break
+        
+        # Only remove outer parens if inner is balanced and contains no top-level operators
+        if depth == 0 and not has_operators and inner.startswith('(') and inner.endswith(')'):
+            # Inner is like ((*a*)), recursively simplify
+            return WhitVMMinifier._simplify_single_expr(inner)
+        
+        return expr
+    
+    @staticmethod
+    def _remove_unused_jumps(lines: list) -> list:
+        """Remove jumps that target the next instruction
+        
+        E.g., if jmp :label: points to the very next instruction, remove it
+        """
+        # First, build a map of label positions (including label declarations)
+        label_positions = {}
+        pos = 0
+        
+        for line in lines:
+            # Check if this line is a label declaration
+            if line.startswith(':') and ':' in line[1:]:
+                end = line.find(':', 1)
+                if end != -1:
+                    label_name = line[1:end]
+                    label_positions[label_name] = pos
+            pos += 1
+        
+        # Second pass: remove jumps to next instruction
+        result = []
+        for i, line in enumerate(lines):
+            tokens = WhitVMMinifier._extract_tokens(line)
+            
+            # Check if it's a jump instruction
+            if tokens and tokens[0] in ('jmp', 'ask') and len(tokens) >= 2:
+                # Extract label from jmp/ask
+                label_ref = tokens[1]
+                if label_ref.startswith(':') and label_ref.endswith(':'):
+                    label_name = label_ref[1:-1]
+                    
+                    # Check if label points to next instruction
+                    if label_name in label_positions:
+                        target_pos = label_positions[label_name]
+                        next_pos = i + 1
+                        
+                        # Only remove unconditional jumps to next position
+                        if target_pos == next_pos and (len(tokens) < 3 or tokens[-1] == '1'):
+                            # This jump is redundant, skip it
+                            continue
+            
+            result.append(line)
         
         return result
     
