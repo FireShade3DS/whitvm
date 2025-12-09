@@ -1,0 +1,15 @@
+set *a* 7
+:a:
+say *a* 0 1
+say # bottles of tommyaweosme on the wall#
+say *a* 0 1
+say # bottles of tommyaweosme#
+say #take one down#
+say #get +100 health#
+set *a* ((*a*) - 1)
+jmp :a: ((*a*) > 1)
+say #one last bottle of tommyaweosme on the wall#
+say #one final bottle of tommyaweosme#
+say #walk away#
+say #keep it up there#
+say #let it ferment into greatness#

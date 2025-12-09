@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whitvm"
+version = "1.0.2"
+description = "WhitVM - Interpreter for parsing and executing interactive fiction scripts"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+]
+authors = [
+    {name = "FireShade3DS"}
+]
+keywords = ["interpreter", "assembly", "games", "text-adventure"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/FireShade3DS/whitvm"
+
+[project.scripts]
+whitvm = "whitvm.cli:main"
+
+[project.entry-points."pipx.run"]
+whitvm = "whitvm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pylint]
+max-line-length = 100

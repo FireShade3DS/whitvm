@@ -1,0 +1,110 @@
+say #=== THE LOST TEMPLE ===# 2 1
+say #A classic text adventure# 1 1
+
+set *health* 100
+set *gold* 0
+set *key_found* 0
+
+:start:
+    say #Your journey begins at the temple entrance.# 2 1
+    say #What do you do?# 1 1
+    say #1) Enter temple  2) Turn back# 1 1
+    ask 2
+    
+    jmp :enter_temple:
+    jmp :leave:
+
+:enter_temple:
+    say #You step into the shadowy temple.# 2 1
+    say #An ancient chamber lies before you.# 1 1
+    say #You see three paths ahead...# 1 1
+    say #1) Left path  2) Right path  3) Straight ahead# 1 1
+    ask 3
+    
+    jmp :left_path:
+    jmp :right_path:
+    jmp :straight_path:
+
+:left_path:
+    say #You enter the left corridor cautiously.# 2 1
+    say #Gold coins glitter on the floor!# 1 1
+    set *gold* ((*gold*) + 50)
+    say #You collect the gold. Total: # 0 1
+    say *gold* 1 1
+    jmp :treasure_chest:
+
+:right_path:
+    say #The right path is narrow and dark.# 2 1
+    say #Suddenly, a hidden door creaks open!# 1 1
+    say #Behind it: a shimmering key.# 1 1
+    set *key_found* 1
+    say #You take the mysterious key.# 1 1
+    jmp :treasure_chest:
+
+:straight_path:
+    say #You walk straight ahead into a vast chamber.# 2 1
+    say #A terrifying dragon blocks your path!# 1 1
+    say #Do you:# 1 1
+    say #1) Fight  2) Run away  3) Offer treasure# 1 1
+    ask 3
+    
+    jmp :fight_dragon:
+    jmp :dragon_escape:
+    jmp :bribe_dragon:
+
+:fight_dragon:
+    say #Combat! The dragon strikes you with fire!# 1 1
+    set *health* ((*health*) - 30)
+    say #Health remaining: # 0 1
+    say *health* 1 1
+    say #You managed to escape!# 1 1
+    jmp :dragon_escape:
+
+:dragon_escape:
+    say #You flee back to the main chamber.# 1 1
+    jmp :treasure_chest:
+
+:bribe_dragon:
+    say #You offer the gold to the dragon.# 1 1
+    say #The dragon accepts and lets you pass!# 1 1
+    set *gold* 0
+    jmp :treasure_chest:
+
+:treasure_chest:
+    say #You discover an ornate treasure chest.# 2 1
+    say #It's locked!# 1 1
+    say #Do you have the key? # 0 1
+    say ((*key_found*) == 1) 1 1
+    jmp :unlock_chest: ((*key_found*) == 1)
+    jmp :skip_treasure: ((*key_found*) == 0)
+
+:unlock_chest:
+    say #The key fits perfectly!# 1 1
+    say #The chest opens to reveal riches!# 1 1
+    set *gold* ((*gold*) + 200)
+    say #You gain 200 gold!# 1 1
+    jmp :end_game:
+
+:skip_treasure:
+    say #Without the key, the chest remains locked.# 1 1
+    jmp :end_game:
+
+:end_game:
+    say #=== ADVENTURE COMPLETE ===# 2 1
+    say #Final Stats:# 1 1
+    say #Gold collected: # 0 1
+    say *gold* 1 1
+    say #Health: # 0 1
+    say *health* 1 1
+    jmp :restart:
+
+:restart:
+    say #Play again? (1=Yes 2=No)# 1 1
+    ask 2
+    jmp :start:
+    halt
+
+:leave:
+    say #You turn back from the temple.# 2 1
+    say #Your adventure ends before it began.# 1 1
+    halt

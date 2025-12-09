@@ -1,0 +1,31 @@
+say #Aweosme Constant Implementation# 1 0
+say #Prints pattern: 56 87 56 56 87 56 56 56 87...# 1 0
+
+say #Initialize variables: n=2, max=20# 1 0
+set *n* 2
+set *max* 20
+set *i* 0
+
+say #Outer loop: n goes from 2 to max# 1 0
+:outer_loop:
+say #Reset inner loop counter# 1 0
+set *i* 1
+say #Skip inner loop if i >= n# 1 0
+jmp :inner_done: ((*i*) >= (*n*))
+
+say #Inner loop: print 56 (n-1) times# 1 0
+:inner_loop:
+say #56# 0 1
+say #Increment inner counter# 1 0
+set *i* ((*i*) + 1)
+jmp :inner_loop: ((*i*) < (*n*))
+
+say #After inner loop, print 87# 1 0
+:inner_done:
+say #87# 0 1
+say #Increment outer counter# 1 0
+set *n* ((*n*) + 1)
+say #Continue outer loop until max# 1 0
+jmp :outer_loop: ((*n*) <= (*max*))
+
+say # 1 1

@@ -1,0 +1,11 @@
+say #=== WORD COUNTER ===#  2 1
+say #Count numbers from 1 to 10# 2 1
+
+set *count* 1
+
+:loop:
+    say *count* 1 1
+    set *count* ((*count*) + 1)
+    jmp :loop: ((*count*) <= 10)
+
+say #Counting complete!# 1 1

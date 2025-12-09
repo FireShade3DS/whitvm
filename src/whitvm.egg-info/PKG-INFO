@@ -1,0 +1,311 @@
+Metadata-Version: 2.4
+Name: whitvm
+Version: 1.0.0
+Summary: WhitVM - Interpreter for parsing and executing interactive fiction scripts
+Author: RenPy ASM Contributors
+Project-URL: Homepage, https://github.com/example/renpy-asm
+Keywords: interpreter,assembly,games,text-adventure
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.0.0
+
+# WhitVM
+
+A Harvard-architecture interpreter for creating interactive text adventures and branching narratives with a clean, assembly-like syntax.
+
+**Create your first game in seconds:**
+
+```whitvm
+:start:
+    say #Welcome to my adventure!# 1 1
+    ask 2
+    
+    jmp :choice_a:
+    jmp :choice_b:
+
+:choice_a:
+    say #You chose path A.# 1 1
+    halt
+
+:choice_b:
+    say #You chose path B.# 1 1
+    halt
+```
+
+**Then run it:**
+
+```bash
+whitvm new MyGame --template dungeon
+whitvm run MyGame/MyGame.whitvm
+```
+
+## Directory Structure
+
+```
+whitvm/
+├── src/whitvm/              # Core library
+│   ├── __init__.py
+│   ├── interpreter.py       # Harvard architecture VM
+│   ├── loader.py            # Syntax validation & file I/O
+│   ├── minifier.py          # Code optimization
+│   └── cli.py               # Command-line interface
+├── tests/                   # Comprehensive test suite (62 tests)
+│   ├── test_interpreter.py  # Core functionality
+│   ├── test_loader.py       # File I/O and validation
+│   ├── test_*aweosme.py     # Language completeness
+│   ├── test_madlibs.py      # String manipulation
+│   └── test_truth_machine.py # Esoteric benchmarks
+├── examples/                # Working example games
+│   ├── quiz_game.whitvm     # Multiple choice quiz
+│   ├── word_counter.whitvm  # Loops and counters
+│   ├── adventure.whitvm     # Text adventure
+│   └── *.whitvm             # More examples
+├── games/dungeon_crawler/   # Full playable game
+│   ├── game.whitvm
+│   └── play.py
+├── docs/                    # Complete documentation
+│   ├── TUTORIAL.md          # Step-by-step guide
+│   ├── ADVANCED.md          # Advanced techniques
+│   ├── STYLE_GUIDE.md       # Code style standards
+│   └── isa.md               # ISA specification
+├── QUICK_START.md           # Quick reference
+├── CHANGELOG.md             # Version history
+├── CONTRIBUTING.md          # Contribution guidelines
+├── AGENTS.md                # Development commands
+└── pyproject.toml           # Package configuration
+```
+
+## Features
+
+- **Simple Syntax**: Assembly-like syntax optimized for game development
+- **Interactive Input**: `ask` instruction for player choices and branching paths
+- **Variables & Expressions**: Arithmetic, comparisons, and string manipulation
+- **Conditional Logic**: All instructions support conditional execution
+- **Minification**: Reduce game size by 17%+ for distribution
+- **Templates**: Scaffolding for blank, dungeon, and story games
+- **Harvard Architecture**: Separate instruction and data memory for clean design
+- **Language Completeness**: Aweosme-complete specification support
+
+## Installation
+
+```bash
+python -m pip install -e .
+```
+
+Or with pipx for command-line use:
+
+```bash
+pipx install .
+```
+
+## Quick Start
+
+### 1. Create a Game
+```bash
+whitvm new MyAdventure --template dungeon
+```
+
+### 2. Run It
+```bash
+cd MyAdventure
+whitvm run MyAdventure.whitvm
+```
+
+### 3. Edit & Minify
+```bash
+whitvm check MyAdventure.whitvm          # Validate
+whitvm minify MyAdventure.whitvm -o release.whitvm  # Optimize
+```
+
+## CLI Commands
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `whitvm run` | Execute a game | `whitvm run game.whitvm` |
+| `whitvm new` | Create project | `whitvm new MyGame --template dungeon` |
+| `whitvm check` | Validate syntax | `whitvm check game.whitvm` |
+| `whitvm minify` | Reduce file size | `whitvm minify game.whitvm -o game.min.whitvm` |
+| `whitvm version` | Show version | `whitvm version` |
+
+**Templates**: `blank` (minimal), `dungeon` (adventure), `story` (choice-based)
+
+## Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** - Quick reference and essential commands
+- **[REFERENCE.md](REFERENCE.md)** - Language syntax quick card
+- **[TUTORIAL.md](docs/TUTORIAL.md)** - Complete guide for beginners
+- **[ADVANCED.md](docs/ADVANCED.md)** - Advanced techniques
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+
+### As a Library
+
+```python
+from whitvm import Interpreter
+
+code = """
+set *name* #Alice#
+say #Hello, # 1 1
+say *name* 1 1
+"""
+
+interp = Interpreter()
+interp.load(code)
+interp.run()
+```
+
+### Running Tests
+
+```bash
+python -m pytest tests/
+```
+
+## Script Syntax
+
+### Basic Elements
+
+| Element | Syntax | Example |
+|---------|--------|---------|
+| Label | `:label_name:` | `:start_scene:` |
+| Variable | `*var_name*` | `*player_health*` |
+| String | `#text content#` | `#Hello World#` |
+| Number | decimal integer | `42`, `100` |
+| Expression | `(expression)` with operators | `((*score*) + (*bonus*))` |
+| Comment | `say #text# 1 0` (condition = 0) | `say #TODO: fix# 1 0` |
+
+### Instructions
+
+| Instruction | Format | Description |
+|-------------|--------|-------------|
+| `say` | `say value [nl_qty] [condition]` | Prints `value` (var, #str#, number, or expression). `nl_qty` = newlines (default: 1). Executes if `condition` != 0 (default: 1). |
+| `ask` | `ask n [condition]` | Prompts for input (1 to n). Jumps forward by (input - 1) instructions if `condition` != 0 (default: 1). Out-of-range input defaults to option 1. |
+| `jmp` | `jmp :label: [condition]` | Jumps to `:label:` if `condition` != 0 (default: 1). |
+| `set` | `set *var* value` | Assigns `value` to variable `*var*`. `value` can be number, string, variable, or expression. |
+| `halt` | `halt [condition]` | Halts execution if `condition` != 0 (default: 1). |
+
+## Example Program
+
+```whitvm
+:start:
+    set *player_health* 100
+    set *player_gold* 0
+    
+    say #===== DUNGEON CRAWLER =====#
+    say #Collect gold and defeat the dragon!# 2 1
+    jmp :room_1:
+
+:room_1:
+    say #--- Room 1: Entrance ---# 2 1
+    say #What do you do?# 1 1
+    say #1) Open chest  2) Go down corridor# 1 1
+    ask 2
+    
+    jmp :chest_room:
+    jmp :corridor:
+
+:chest_room:
+    set *player_gold* ((*player_gold*) + 25)
+    say #Found 25 gold!# 2 1
+    jmp :end:
+
+:corridor:
+    say #A dark corridor stretches ahead.# 2 1
+
+:end:
+    say #The adventure awaits!# 1 1
+```
+
+## Testing
+
+The project includes **62 unit tests** across multiple test suites:
+
+**Core Tests (41 tests)**
+- Parser functionality and tokenization
+- Variable operations and assignments
+- Expression evaluation and operator precedence
+- Control flow (jumps, conditionals, loops)
+- User input (`ask`) and branching
+- Output (`say`) with formatting options
+- Error handling and validation
+- `halt` instruction
+
+**Loader Tests (11 tests)**
+- .whitvm file I/O
+- Syntax validation (strings, parentheses)
+- File discovery and enumeration
+
+**Example Programs (9 tests)**
+- Mad Libs story generation with concatenation
+- Truth machine (esoteric language benchmark)
+- Aweosme-complete specification (7 bottles, function, constant)
+
+Run tests with:
+```bash
+python -m unittest discover tests/
+```
+
+## Architecture Details
+
+### Parser
+- Tokenizes assembly code into instructions
+- Recognizes labels, variables, strings, and expressions
+- Handles nested expressions and operator precedence
+
+### Interpreter
+- Maintains separate instruction memory (IMEM) and data memory (DMEM)
+- Executes instructions sequentially via program counter (PC)
+- Supports conditional execution on all instructions
+- Returns 1 (true) for non-zero values, 0 (false) for zero
+
+### Expression Evaluation
+- Operators: `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `>`, `<=`, `>=`
+- Division is integer division (floor division)
+- **Operator Precedence** (highest to lowest):
+  1. Multiplication/Division/Modulo (`*`, `/`, `%`)
+  2. Addition/Subtraction (`+`, `-`)
+  3. Comparison (`==`, `!=`, `<`, `>`, `<=`, `>=`)
+- Comparisons return `1` (true) or `0` (false)
+- Variables and strings can be referenced and compared
+- Built-in function `rng`: `(rng min max)` returns random integer [min, max] inclusive
+
+### Built-in Functions
+
+| Function | Format | Description |
+|----------|--------|-------------|
+| `rng` | `(rng min max)` | Returns random integer between min and max (inclusive) |
+
+## Comments
+
+Since the parser doesn't support comment syntax, use this pattern to embed non-printing comments:
+
+```asm
+say #This is a hidden comment# 1 0
+```
+
+The condition `0` prevents execution/printing while allowing you to document your code.
+
+## Architecture Highlights
+
+### Harvard Architecture
+WhitVM uses separate instruction memory (IMEM) and data memory (DMEM), providing clean separation between code and state. This is a classic computer architecture pattern that ensures programs cannot accidentally modify themselves.
+
+### Program Counter
+Execution follows a sequential program counter that advances one instruction per cycle. Labels allow jumps to specific addresses, enabling branching, loops, and complex control flow.
+
+### Conditional Execution
+Every instruction supports optional conditional execution—the instruction only runs if its condition evaluates to non-zero. This enables elegant branching without requiring additional instructions.
+
+## Implementation Notes
+
+- **Variable Initialization**: All variables must be explicitly `set` before use. Accessing uninitialized variables raises an error.
+- **Ambiguous `*` Character**: The `*` character wraps variables and is also the multiplication operator. The tokenizer treats `*` as a variable wrapper only when followed by alphanumeric/underscore characters. In expressions, `*` without these characters is treated as multiplication.
+- **Automatic Halt**: Programs halt automatically when instruction memory is exhausted.
+- **Conditional Defaults**: All instructions with conditions default to executing (condition = 1).
+- **Truthiness**: Non-zero values evaluate to true (1), zero evaluates to false (0).
+- **Expression Evaluation**: Uses recursive descent parsing with proper operator precedence. Supports arithmetic, comparisons, and built-in functions like `rng`.

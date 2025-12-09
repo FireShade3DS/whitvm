@@ -1,0 +1,32 @@
+say #7 Bottles of Tommyaweosme# 1 0
+say #Aweosme-Complete Implementation# 1 0
+
+say #Initialize counter to 7# 1 0
+set *i* 7
+
+say #Main loop: counts down from 7 to 2# 1 0
+:loop:
+say #Print current bottle count (no newline)# 1 0
+say *i* 0 1
+say # bottles of tommyaweosme on the wall# 1 1
+
+say #Print verse line 2# 1 0
+say *i* 0 1
+say # bottles of tommyaweosme# 1 1
+
+say #Print action lines# 1 0
+say #take one down# 1 1
+say #get +100 health# 1 1
+
+say #Decrement counter# 1 0
+set *i* ((*i*) - 1)
+
+say #Continue loop if i > 1# 1 0
+jmp :loop: ((*i*) > 1)
+
+say #Verse for the last bottle# 1 0
+say #one last bottle of tommyaweosme on the wall# 1 1
+say #one final bottle of tommyaweosme# 1 1
+say #walk away# 1 1
+say #keep it up there# 1 1
+say #let it ferment into greatness# 1 1

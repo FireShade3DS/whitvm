@@ -1,0 +1,5 @@
+[console_scripts]
+whitvm = whitvm.cli:main
+
+[pipx.run]
+whitvm = whitvm.cli:main

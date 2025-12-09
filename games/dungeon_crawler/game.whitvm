@@ -1,0 +1,138 @@
+:game_start:
+    set *player_health* 100
+    set *player_gold* 0
+    set *current_room* 1
+    
+    say #===== DUNGEON CRAWLER =====#
+    say #Collect gold and defeat the dragon!# 2 1
+    jmp :room_1:
+
+:room_1:
+    set *current_room* 1
+    say #--- Room 1: Entrance ---# 2 1
+    say #You see a treasure chest and a dark corridor.# 1 1
+    say #What do you do?# 1 1
+    say #1) Open chest  2) Go down corridor# 1 1
+    ask 2
+    
+    jmp :chest_room:
+    jmp :room_2:
+
+:chest_room:
+    set *player_gold* ((*player_gold*) + 25)
+    say #You found 25 gold in the chest!# 2 1
+    say #Total gold: # 1 1
+    say *player_gold* 1 1
+    jmp :room_2:
+
+:room_2:
+    set *current_room* 2
+    say #--- Room 2: Goblin's Chamber ---# 2 1
+    say #A goblin blocks your path, demanding payment!# 1 1
+    say #1) Pay 10 gold  2) Fight the goblin# 1 1
+    ask 2
+    
+    jmp :pay_goblin:
+    jmp :fight_goblin:
+
+:pay_goblin:
+    set *can_pay* ((*player_gold*) >= 10)
+    jmp :pay_success: (*can_pay*)
+    say #You don't have enough gold!# 2 1
+    jmp :fight_goblin:
+
+:pay_success:
+    set *player_gold* ((*player_gold*) - 10)
+    say #You paid the goblin. He lets you pass.# 2 1
+    jmp :room_3:
+
+:fight_goblin:
+    say #You clash with the goblin!# 1 1
+    set *player_health* ((*player_health*) - 20)
+    say #The goblin hits you for 20 damage!# 1 1
+    say #Your health: # 1 1
+    say *player_health* 1 1
+    jmp :still_alive: (*player_health* > 0)
+    jmp :game_over_lose:
+
+:still_alive:
+    say #You defeated the goblin! He drops 15 gold.# 2 1
+    set *player_gold* ((*player_gold*) + 15)
+    jmp :room_3:
+
+:room_3:
+    set *current_room* 3
+    say #--- Room 3: Treasury ---# 2 1
+    say #Piles of gold everywhere! What do you take?# 1 1
+    say #1) Take 30 gold  2) Take 60 gold  3) Leave# 1 1
+    ask 3
+    
+    jmp :take_30:
+    jmp :take_60:
+    jmp :boss_room:
+
+:take_30:
+    set *player_gold* ((*player_gold*) + 30)
+    say #You grabbed 30 gold and heard a rumble...# 2 1
+    jmp :boss_room:
+
+:take_60:
+    set *player_gold* ((*player_gold*) + 60)
+    say #ALARM! Taking too much gold triggered a trap!# 2 1
+    set *player_health* ((*player_health*) - 15)
+    say #You take 15 damage from falling spikes!# 1 1
+    say #Health: # 1 1
+    say *player_health* 1 1
+    jmp :check_boss: (*player_health* > 0)
+    jmp :game_over_lose:
+
+:check_boss:
+    jmp :boss_room:
+
+:boss_room:
+    say #--- Room 4: Dragon's Lair ---# 2 1
+    say #A mighty dragon guards a pile of treasure!# 1 1
+    say #1) Fight the dragon  2) Run away# 1 1
+    ask 2
+    
+    jmp :fight_dragon:
+    jmp :game_over_escape:
+
+:fight_dragon:
+    say #Epic battle! The dragon breathes fire!# 1 1
+    set *player_health* ((*player_health*) - 30)
+    say #You take 30 damage! Health: # 1 1
+    say *player_health* 1 1
+    jmp :dragon_alive: (*player_health* > 0)
+    jmp :game_over_lose:
+
+:dragon_alive:
+    say #You strike the dragon with your sword!# 1 1
+    say #The dragon falls! You claim the treasure!# 2 1
+    set *player_gold* ((*player_gold*) + 100)
+    jmp :game_over_win:
+
+:game_over_win:
+    say #===== YOU WON! =====# 2 1
+    say #Final gold: # 1 1
+    say *player_gold* 1 1
+    say #Final health: # 1 1
+    say *player_health* 1 1
+    say #Congratulations, adventurer!# 1 1
+    jmp :program_end:
+
+:game_over_escape:
+    say #You escaped with your life but lost your nerve.# 2 1
+    say #Final gold: # 1 1
+    say *player_gold* 1 1
+    jmp :program_end:
+
+:game_over_lose:
+    say #===== GAME OVER =====# 2 1
+    say #You were defeated!# 1 1
+    say #Gold collected: # 1 1
+    say *player_gold* 1 1
+    jmp :program_end:
+
+:program_end:
+    say #Thanks for playing Dungeon Crawler!# 2 1

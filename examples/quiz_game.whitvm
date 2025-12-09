@@ -1,0 +1,55 @@
+say #=== TRIVIA QUIZ ===# 2 1
+say #Answer each question correctly!# 2 1
+
+set *score* 0
+set *correct_answer* 0
+
+say #Question 1: What is 2 + 2?# 1 1
+say #1: 3, 2: 4, 3: 5# 1 1
+ask 3
+
+set *correct_answer* 0
+jmp :q1_a1:
+jmp :q1_a2:
+jmp :q1_a3:
+
+:q1_a1:
+    say #Wrong! The answer is 4.# 1 1
+    jmp :q2:
+
+:q1_a2:
+    say #Correct!# 1 1
+    set *score* ((*score*) + 1)
+    jmp :q2:
+
+:q1_a3:
+    say #Wrong! The answer is 4.# 1 1
+    jmp :q2:
+
+:q2:
+    say #Question 2: What is the capital of France?# 1 1
+    say #1: London, 2: Paris, 3: Berlin# 1 1
+    ask 3
+
+jmp :q2_a1:
+jmp :q2_a2:
+jmp :q2_a3:
+
+:q2_a1:
+    say #Wrong! The answer is Paris.# 1 1
+    jmp :results:
+
+:q2_a2:
+    say #Correct!# 1 1
+    set *score* ((*score*) + 1)
+    jmp :results:
+
+:q2_a3:
+    say #Wrong! The answer is Paris.# 1 1
+    jmp :results:
+
+:results:
+    say #=== RESULTS ===# 2 1
+    say #Your score: # 0 1
+    say *score* 1 1
+    say #out of 2# 1 1

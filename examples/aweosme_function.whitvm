@@ -1,0 +1,77 @@
+say #Aweosme Function Implementation# 1 0
+say #Outputs 87 if input is divisible by 5, else 56 forever# 1 0
+
+say #Enter a number (1-10): # 0 1
+say #Get user input 1-10# 1 0
+ask 10
+say #Route to corresponding input handler# 1 0
+jmp :input_1:
+jmp :input_2:
+jmp :input_3:
+jmp :input_4:
+jmp :input_5:
+jmp :input_6:
+jmp :input_7:
+jmp :input_8:
+jmp :input_9:
+jmp :input_10:
+
+:input_1:
+set *n* 1
+jmp :compute:
+
+:input_2:
+set *n* 2
+jmp :compute:
+
+:input_3:
+set *n* 3
+jmp :compute:
+
+:input_4:
+set *n* 4
+jmp :compute:
+
+:input_5:
+set *n* 5
+jmp :compute:
+
+:input_6:
+set *n* 6
+jmp :compute:
+
+:input_7:
+set *n* 7
+jmp :compute:
+
+:input_8:
+set *n* 8
+jmp :compute:
+
+:input_9:
+set *n* 9
+jmp :compute:
+
+:input_10:
+set *n* 10
+jmp :compute:
+
+:compute:
+say #Check if n is divisible by 5# 1 0
+set *result* ((*n* % 5))
+say #If divisible by 5, output 87 once# 1 0
+jmp :output_87: ((*result*) == 0)
+say #Otherwise, output 56 forever# 1 0
+jmp :output_56:
+
+:output_87:
+say 87 1 1
+jmp :end:
+
+:output_56:
+:loop_56:
+say 56 1 1
+say #Infinite loop# 1 0
+jmp :loop_56:
+
+:end:

@@ -1,0 +1,51 @@
+say #WhitVM Example Programs# 1 0
+say #Demonstrates basic syntax and control flow patterns# 1 0
+
+say #Example 1: Counter loop# 1 0
+say #Counts from 0 to 2 and prints each value# 1 0
+:counter_program:
+    say #Initialize counter and max value# 1 0
+    set *count* 0
+    set *max* 3
+
+:count_loop:
+    say #Print current count# 1 0
+    say *count* 1 1
+    say #Increment counter# 1 0
+    set *count* ((*count*) + 1)
+    say #Jump back to loop if count < max# 1 0
+    jmp :count_loop: ((*count*) < (*max*))
+    say #Done!# 1 1
+
+
+say #Example 2: Modulo operation# 1 0
+say #Divides 17 by 5 and prints the remainder# 1 0
+:modulo_example:
+    say #Set values for modulo operation# 1 0
+    set *num* 17
+    set *divisor* 5
+    say #Calculate: 17 % 5# 1 0
+    set *result* ((*num*) % (*divisor*))
+    
+    say #17 modulo 5 = # 0 1
+    say *result* 1 1
+
+
+say #Example 3: Conditional branching with expressions# 1 0
+say #Tests if score meets passing grade# 1 0
+:expression_test:
+    say #Initialize test values# 1 0
+    set *score* 85
+    set *passing_grade* 70
+    
+    say #Check if score >= passing_grade# 1 0
+    jmp :pass: ((*score*) >= (*passing_grade*))
+    say #You failed!# 1 1
+    jmp :program_end:
+
+:pass:
+    say #You passed!# 1 1
+
+:program_end:
+    say #Grade: # 0 1
+    say *score* 1 1

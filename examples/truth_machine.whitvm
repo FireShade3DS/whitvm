@@ -1,0 +1,23 @@
+say #Truth Machine - Esoteric Language Benchmark# 1 0
+say #Outputs 0 once, or 1 forever, based on input# 1 0
+
+say #Enter 0 or 1: # 0 1
+say #Prompt user for input (1=zero, 2=one)# 1 0
+ask 2
+say #Jump based on input# 1 0
+jmp :zero:
+jmp :one:
+
+:zero:
+say #Output 0 once# 1 0
+say 0 1 1
+jmp :end:
+
+:one:
+say #Output 1 forever in infinite loop# 1 0
+:loop:
+say 1 1 1
+say #Jump back to loop# 1 0
+jmp :loop:
+
+:end:
