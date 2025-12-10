@@ -16,7 +16,7 @@ class WhitVMMinifier:
     def minify(code: str, shrink_vars: bool = True, shrink_labels: bool = True, 
                eval_const: bool = True, remove_defaults: bool = True, pool_strings: bool = True,
                dead_code: bool = True, simplify_expr: bool = True, remove_unused_jumps: bool = True,
-               remove_unreachable: bool = False) -> str:
+               remove_unreachable: bool = True) -> str:
         """Minify WhitVM code
         
         Removes:
@@ -584,15 +584,30 @@ class WhitVMMinifier:
         
         Removes lines after:
         - halt (unconditional termination)
-        - jmp :label: (unconditional jump, unless followed by label)
+        - jmp :label: (unconditional jump, unless part of ask dispatch)
         
-        Note: Does NOT remove code after `ask` since `ask` is conditional branching
+        Preserves ask dispatch patterns: ask N followed by N jump instructions
         
         But preserves labels that might be jump targets
         """
         result = []
         i = 0
         
+        # First pass: detect ask dispatch patterns
+        ask_dispatch_ranges = set()  # indices that are part of ask dispatch
+        for i in range(len(lines)):
+            tokens = WhitVMMinifier._extract_tokens(lines[i])
+            if tokens and tokens[0] == 'ask' and len(tokens) >= 2:
+                try:
+                    n = int(tokens[1])
+                    # Mark the next n indices as part of ask dispatch
+                    for j in range(i + 1, min(i + 1 + n, len(lines))):
+                        ask_dispatch_ranges.add(j)
+                except (ValueError, IndexError):
+                    pass
+        
+        # Second pass: remove unreachable code
+        i = 0
         while i < len(lines):
             line = lines[i]
             tokens = WhitVMMinifier._extract_tokens(line)
@@ -609,7 +624,7 @@ class WhitVMMinifier:
             result.append(line)
             
             # Check if this instruction is unconditional termination
-            if tokens:
+            if tokens and i not in ask_dispatch_ranges:
                 opcode = tokens[0]
                 
                 # Unconditional halt
@@ -624,16 +639,19 @@ class WhitVMMinifier:
                         i += 1
                     continue
                 
-                # Unconditional jump (but NOT ask, which is conditional)
+                # Unconditional jump (NOT in ask dispatch)
                 elif opcode == 'jmp' and (len(tokens) < 3 or tokens[-1] == '1'):
                     # Everything after jmp (until next label) is unreachable
                     i += 1
                     while i < len(lines):
                         next_line = lines[i]
-                        # Keep labels but skip other instructions
                         if next_line.startswith(':') and ':' in next_line[1:]:
                             break
-                        i += 1
+                        # Skip this instruction unless it's part of ask dispatch
+                        if i not in ask_dispatch_ranges:
+                            i += 1
+                        else:
+                            break
                     continue
             
             i += 1
