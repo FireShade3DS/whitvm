@@ -1,7 +1,0 @@
-ask 2
-jmp :a:
-jmp :b:
-:a:
-halt
-:b:
-halt

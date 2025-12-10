@@ -24,7 +24,7 @@ set *x* 42
 say #Another comment# 1 0
 say *x* 1 1
 """
-        minified = WhitVMMinifier.minify(code, shrink_vars=False, remove_defaults=False)
+        minified = WhitVMMinifier.minify(code)
         self.assertNotIn("This is a comment", minified)
         self.assertNotIn("Another comment", minified)
         self.assertIn("set *x* 42", minified)
@@ -68,10 +68,10 @@ say *count* 1 1
 set *count* ((*count*) + 1)
 jmp :count_loop: ((*count*) < 5)
 """
-        minified = WhitVMMinifier.minify(code, shrink_vars=False, shrink_labels=False)
+        minified = WhitVMMinifier.minify(code)
         self.assertIn(":loop:", minified)
         self.assertIn("set *count* 0", minified)
-        # Check for the jmp instruction with the loop label (variable might be renamed)
+        # Check for the jmp instruction with the loop label
         self.assertIn("jmp :count_loop:", minified)
         self.assertIn("((*count*) < 5)", minified)
     
@@ -82,7 +82,7 @@ say #This is output# 1 1
 say #This is a comment# 1 0
 say #This too# 1 1
 """
-        minified = WhitVMMinifier.minify(code, remove_defaults=False)
+        minified = WhitVMMinifier.minify(code)
         self.assertIn("say #This is output#", minified)
         self.assertIn("say #This too#", minified)
         self.assertNotIn("say #This is a comment#", minified)
@@ -95,7 +95,7 @@ set *result* ((*a*) + (*b*))
 say #Result: # 1 0
 say *result* 1 1
 """
-        minified = WhitVMMinifier.minify(code, shrink_vars=False)
+        minified = WhitVMMinifier.minify(code)
         self.assertNotIn("say #Check#", minified)
         self.assertNotIn("say #Result: #", minified)
         self.assertIn("set *result* ((*a*) + (*b*))", minified)
@@ -124,7 +124,7 @@ set *x* ((*a*) + (*b*))
 say #Debug: (value is ((*x*)))# 1 0
 say *x* 1 1
 """
-        minified = WhitVMMinifier.minify(code, shrink_vars=False)
+        minified = WhitVMMinifier.minify(code)
         self.assertNotIn("#Debug: (value is ((*x*)))#", minified)
         self.assertIn("set *x* ((*a*) + (*b*))", minified)
         self.assertIn("say *x*", minified)
