@@ -2,6 +2,32 @@
 
 All notable changes to WhitVM are documented in this file.
 
+## [1.0.3] - 2025
+
+### Added
+- Profiler tool for benchmarking and optimizing games (measures instructions/second)
+- 8 new comprehensive minification optimization tests
+- Proper pytest test suite structure with dedicated test files
+
+### Changed
+- **Minifier refactor**: Separated concerns into minifier_core.py and minifier.py
+  - Core minification (comments, defaults, whitespace) always applied, safe
+  - Advanced optimizations (name shrinking, constant evaluation, string pooling, dead code removal, unreachable code elimination) opt-in flags
+- Consolidated documentation: 6 separate markdown files merged into single `docs/DOCUMENTATION.md`
+- Reorganized file structure: scripts moved to `scripts/`, CHANGELOG moved to `docs/`
+- Improved .gitignore with comprehensive Python, testing, IDE, and OS patterns
+
+### Fixed
+- Fixed tokenizer to properly handle `*` (multiplication) in constant expressions by using non-greedy regex
+- Fixed unreachable code elimination to correctly handle ask dispatch patterns (jumps after ask are reachable)
+- Resolved symbol ambiguity between `*` multiplication operator and `*var*` variable references
+
+### Technical
+- Minifier achieves 30%+ file size reduction on complex games
+- All optimization passes work safely together
+- Conservative multi-pass strategy preserves labels even if unused
+- Reduced repo clutter: 964K total, 33 source files, comprehensive .gitignore
+
 ## [1.0.2] - 2025
 
 ### Fixed
