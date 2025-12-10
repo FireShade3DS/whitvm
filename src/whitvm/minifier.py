@@ -16,7 +16,7 @@ class WhitVMMinifier:
     def minify(code: str, shrink_vars: bool = True, shrink_labels: bool = True, 
                eval_const: bool = True, remove_defaults: bool = True, pool_strings: bool = True,
                dead_code: bool = True, simplify_expr: bool = True, remove_unused_jumps: bool = True,
-               remove_unreachable: bool = True) -> str:
+               remove_unreachable: bool = False) -> str:
         """Minify WhitVM code
         
         Removes:
@@ -585,7 +585,8 @@ class WhitVMMinifier:
         Removes lines after:
         - halt (unconditional termination)
         - jmp :label: (unconditional jump, unless followed by label)
-        - ask (unconditional branch)
+        
+        Note: Does NOT remove code after `ask` since `ask` is conditional branching
         
         But preserves labels that might be jump targets
         """
@@ -623,7 +624,7 @@ class WhitVMMinifier:
                         i += 1
                     continue
                 
-                # Unconditional jump
+                # Unconditional jump (but NOT ask, which is conditional)
                 elif opcode == 'jmp' and (len(tokens) < 3 or tokens[-1] == '1'):
                     # Everything after jmp (until next label) is unreachable
                     i += 1
