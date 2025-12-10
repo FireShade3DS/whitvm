@@ -15,7 +15,8 @@ class WhitVMMinifier:
     @staticmethod
     def minify(code: str, shrink_vars: bool = True, shrink_labels: bool = True, 
                eval_const: bool = True, remove_defaults: bool = True, pool_strings: bool = True,
-               dead_code: bool = False, simplify_expr: bool = True, remove_unused_jumps: bool = True) -> str:
+               dead_code: bool = True, simplify_expr: bool = True, remove_unused_jumps: bool = True,
+               remove_unreachable: bool = True) -> str:
         """Minify WhitVM code
         
         Removes:
@@ -33,6 +34,7 @@ class WhitVMMinifier:
         - Pool repeated strings into variables (#text# → *s* where *s* = #text#)
         - Simplify expressions (remove nested parentheses)
         - Remove unused jumps
+        - Remove unreachable code (after halt/unconditional jumps)
         
         Args:
             code: WhitVM source code
@@ -44,6 +46,7 @@ class WhitVMMinifier:
             dead_code: Remove unused variables (set but never used)
             simplify_expr: Simplify expressions by removing unnecessary parentheses
             remove_unused_jumps: Remove jumps that target the next instruction
+            remove_unreachable: Remove unreachable code after halt/unconditional jumps
             
         Returns:
             Minified code
@@ -99,7 +102,11 @@ class WhitVMMinifier:
         if remove_unused_jumps:
             cleaned_lines = WhitVMMinifier._remove_unused_jumps(cleaned_lines)
         
-        # Tenth pass: compact spacing (remove extra spaces)
+        # Tenth pass: remove unreachable code
+        if remove_unreachable:
+            cleaned_lines = WhitVMMinifier._remove_unreachable_code(cleaned_lines)
+        
+        # Eleventh pass: compact spacing (remove extra spaces)
         cleaned_lines = [WhitVMMinifier._compact_spacing(line) for line in cleaned_lines]
         
         return '\n'.join(cleaned_lines)
@@ -568,6 +575,67 @@ class WhitVMMinifier:
                             continue
             
             result.append(line)
+        
+        return result
+    
+    @staticmethod
+    def _remove_unreachable_code(lines: list) -> list:
+        """Remove code that cannot be reached
+        
+        Removes lines after:
+        - halt (unconditional termination)
+        - jmp :label: (unconditional jump, unless followed by label)
+        - ask (unconditional branch)
+        
+        But preserves labels that might be jump targets
+        """
+        result = []
+        i = 0
+        
+        while i < len(lines):
+            line = lines[i]
+            tokens = WhitVMMinifier._extract_tokens(line)
+            
+            # Check if line is a label
+            is_label = line.startswith(':') and ':' in line[1:]
+            
+            if is_label:
+                # Always keep labels
+                result.append(line)
+                i += 1
+                continue
+            
+            result.append(line)
+            
+            # Check if this instruction is unconditional termination
+            if tokens:
+                opcode = tokens[0]
+                
+                # Unconditional halt
+                if opcode == 'halt' and (len(tokens) < 2 or tokens[-1] == '1'):
+                    # Everything after halt (until next label) is unreachable
+                    i += 1
+                    while i < len(lines):
+                        next_line = lines[i]
+                        # Keep labels but skip other instructions
+                        if next_line.startswith(':') and ':' in next_line[1:]:
+                            break
+                        i += 1
+                    continue
+                
+                # Unconditional jump
+                elif opcode == 'jmp' and (len(tokens) < 3 or tokens[-1] == '1'):
+                    # Everything after jmp (until next label) is unreachable
+                    i += 1
+                    while i < len(lines):
+                        next_line = lines[i]
+                        # Keep labels but skip other instructions
+                        if next_line.startswith(':') and ':' in next_line[1:]:
+                            break
+                        i += 1
+                    continue
+            
+            i += 1
         
         return result
     

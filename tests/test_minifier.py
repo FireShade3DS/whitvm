@@ -38,10 +38,11 @@ set *x* 42
 set *y* 10
 
 say *x* 1 1
+say *y* 1 1
 """
         minified = WhitVMMinifier.minify(code)
         lines = minified.split('\n')
-        self.assertEqual(len(lines), 3)
+        self.assertEqual(len(lines), 4)
         for line in lines:
             self.assertTrue(line.strip())  # All lines have content
     

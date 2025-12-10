@@ -28,4 +28,4 @@ set *n* ((*n*) + 1)
 say #Continue outer loop until max# 1 0
 jmp :outer_loop: ((*n*) <= (*max*))
 
-say # 1 1
+say #End of program# 1 1

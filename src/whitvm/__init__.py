@@ -23,6 +23,7 @@ Or use the CLI:
 from .interpreter import Interpreter, Parser
 from .loader import WhitVMLoader, Loader
 from .minifier import WhitVMMinifier
+from .profiler import WhitVMProfiler
 
 __version__ = "1.0.0"
-__all__ = ["Interpreter", "Parser", "WhitVMLoader", "Loader", "WhitVMMinifier"]
+__all__ = ["Interpreter", "Parser", "WhitVMLoader", "Loader", "WhitVMMinifier", "WhitVMProfiler"]
