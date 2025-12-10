@@ -1047,9 +1047,9 @@ say #High roll!# 1 1
 
 ### Example 4: Complete Dungeon Game
 
-See `games/dungeon_crawler/` directory for a complete game with items, enemies, and progression.
+See `examples/` directory for a complete game with items, enemies, and progression.
 
-Run it with: `whitvm run games/dungeon_crawler/game.whitvm`
+Run it with: `whitvm run examples/game.whitvm`
 
 ---
 
