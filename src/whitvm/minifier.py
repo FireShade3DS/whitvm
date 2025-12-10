@@ -262,7 +262,14 @@ class WhitVMMinifier:
         """Try to evaluate expression with only literals"""
         expr = expr[1:-1].strip()
         
-        if '*' in expr or 'rng' in expr:
+        # Check for variable references (*var*), not just any *
+        if '*' in expr:
+            # If there's a * followed by something that looks like a variable, reject
+            import re
+            if re.search(r'\*[a-zA-Z_]\w*\*', expr):
+                return None
+        
+        if 'rng' in expr:
             return None
         
         try:

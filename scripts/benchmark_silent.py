@@ -10,7 +10,6 @@ from src.whitvm import WhitVMProfiler
 examples = [
     'examples/word_counter.whitvm',
     'examples/aweosme_7_bottles.whitvm',
-    'examples/aweosme_function.whitvm',
 ]
 
 profiler = WhitVMProfiler()
